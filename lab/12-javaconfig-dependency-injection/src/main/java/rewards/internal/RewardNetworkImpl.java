@@ -49,4 +49,6 @@ public class RewardNetworkImpl implements RewardNetwork {
 		accountRepository.updateBeneficiaries(account);
 		return rewardRepository.confirmReward(contribution, dining);
 	}
+
+
 }
