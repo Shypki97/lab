@@ -20,4 +20,5 @@ public class TestInfrastructureConfig {
 	public static LoggingBeanPostProcessor loggingBean(){
 		return new LoggingBeanPostProcessor();
 	}
+
 }
