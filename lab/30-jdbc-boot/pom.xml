@@ -14,7 +14,7 @@
     <name>30-jdbc-boot</name>
     <description>30-jdbc-boot</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
