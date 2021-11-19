@@ -1,9 +1,11 @@
 package config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -22,12 +24,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity      // Redundant in Spring Boot app
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class RestSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
+                .mvcMatchers(HttpMethod.DELETE, "/accounts/**").hasAnyRole("SUPERADMIN")
+                .mvcMatchers(HttpMethod.POST, "/accounts/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .mvcMatchers(HttpMethod.PUT, "/accounts/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .mvcMatchers(HttpMethod.GET, "/accounts/**").hasAnyRole("USER", "ADMIN", "SUPERADMIN")
                 // TODO-04: Configure authorization using mvcMatchers method
                 // - Allow DELETE on the /accounts resource (or any sub-resource)
                 //   for "SUPERADMIN" role only
@@ -39,9 +46,9 @@ public class RestSecurityConfig extends WebSecurityConfigurerAdapter {
                 // For all other URL's, make sure the caller is authenticated
                 .mvcMatchers("/**").authenticated()
                 .and()
-            .httpBasic()
+                .httpBasic()
                 .and()
-            .csrf().disable();
+                .csrf().disable();
     }
 
     @Override
@@ -54,8 +61,11 @@ public class RestSecurityConfig extends WebSecurityConfigurerAdapter {
         // - "admin"/"admin" with "USER" and "ADMIN" roles
         // - "superadmin"/"superadmin" with "USER", "ADMIN", and "SUPERADMIN" roles
         // (Make sure to store the password in encoded form.)
+
         auth.inMemoryAuthentication()
-            .withUser("user").password(passwordEncoder.encode("user")).roles("USER").and()
+                .withUser("user").password(passwordEncoder.encode("user")).roles("USER").and()
+                .withUser("admin").password(passwordEncoder.encode("admin")).roles("USER","ADMIN").and()
+                .withUser("superadmin").password(passwordEncoder.encode("superadmin")).roles("USER","ADMIN","SUPERADMIN");
 
         ;
 
@@ -105,6 +115,7 @@ class CustomUserDetailsService implements UserDetailsService {
         return builder.build();
     }
 }
+
 // TODO-17 (Optional): Create custom AuthenticationProvider
 // - Note that it needs to implement AuthenticationProvider interface
 // - Uncomment the commented code fragment below so that this custom
